@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ders Programı</title>
+  <link rel="stylesheet" href="css/app.css">
+  <!-- PDF kütüphaneleri (yerel kopya, internet gerektirmez) -->
+  <script src="vendor/pdf-lib.min.js" defer></script>
+  <script src="vendor/fontkit.umd.min.js" defer></script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header class="ust">
+    <h1 class="logo">Ders Programı</h1>
+    <span class="surum" id="surumBilgisi" hidden></span>
+    <p class="durum" id="durum" role="status" aria-live="polite"></p>
+    <div class="ust-butonlar" id="duzenButonlari" hidden>
+      <button type="button" id="btnUyari" class="btn btn-uyari" popovertarget="uyariPaneli" hidden></button>
+      <button type="button" id="btnGeri" class="btn" disabled title="Geri al (Ctrl+Z)">↶ Geri al</button>
+      <button type="button" id="btnIleri" class="btn" disabled title="Yinele (Ctrl+Y)">↷ Yinele</button>
+      <button type="button" id="btnAyarlar" class="btn">⚙ Ayarlar</button>
+    </div>
+    <div class="ust-butonlar">
+      <button type="button" class="btn btn-yardim" command="show-modal" commandfor="yardimPenceresi" aria-label="Nasıl kullanılır?" title="Nasıl kullanılır?">?</button>
+      <button type="button" id="btnAc" class="btn">PDF Aç</button>
+      <button type="button" id="btnKaydet" class="btn btn-ana" disabled>Kaydet</button>
+    </div>
+  </header>
+
+  <!-- Başlangıç ekranı -->
+  <main id="baslangic" class="baslangic">
+    <button type="button" class="kart kart-taslak" id="kartTaslak" hidden>
+      <span class="kart-baslik">Yarım Kalan Çalışma</span>
+      <span class="kart-alt" id="taslakBilgi"></span>
+    </button>
+    <button type="button" class="kart kart-ana" id="kartAc">
+      <span class="kart-baslik">PDF Aç</span>
+      <span class="kart-alt">Ders programı PDF'ini seçin.<br>Eski PDF'lerde sınıflar ve öğretmenler dosyalarını birlikte seçin.</span>
+    </button>
+    <button type="button" class="kart" id="kartFet" command="show-modal" commandfor="fetPenceresi">
+      <span class="kart-baslik">FET'ten Yeni Program</span>
+      <span class="kart-alt">Programı hazırlayan kişi için</span>
+    </button>
+  </main>
+
+  <!-- Çalışma ekranı -->
+  <div id="calisma" class="calisma" hidden>
+    <nav class="kenar" aria-label="Programlar">
+      <details open>
+        <summary>Sınıflar</summary>
+        <div class="liste-arac">
+          <button type="button" data-tumu="sinif" title="Tüm sınıfları göster" aria-label="Tüm sınıfları göster">☑</button>
+          <button type="button" data-temizle="sinif" title="Sınıf seçimini temizle" aria-label="Sınıf seçimini temizle">✕</button>
+        </div>
+        <ul class="liste" id="sinifListesi"></ul>
+      </details>
+      <details open>
+        <summary>Öğretmenler</summary>
+        <div class="liste-arac">
+          <button type="button" data-tumu="ogretmen" title="Tüm öğretmenleri göster" aria-label="Tüm öğretmenleri göster">☑</button>
+          <button type="button" data-temizle="ogretmen" title="Öğretmen seçimini temizle" aria-label="Öğretmen seçimini temizle">✕</button>
+        </div>
+        <ul class="liste" id="ogretmenListesi"></ul>
+      </details>
+    </nav>
+    <section class="sahne" id="sahne" aria-label="Seçili programlar"></section>
+  </div>
+
+  <input type="file" id="pdfSecici" accept="application/pdf,.pdf" multiple hidden>
+
+  <dialog id="fetPenceresi" aria-labelledby="fetBaslik" closedby="any">
+    <form method="dialog" class="pencere">
+      <h2 id="fetBaslik">FET'ten Yeni Program</h2>
+      <p>Okul klasöründeki dosyaları birlikte seçin:</p>
+      <ul class="ipucu">
+        <li><b>.fet</b> dosyası (…_data_and_timetable.fet)</li>
+        <li><b>okul.json</b> (okul adı ve saatler)</li>
+        <li><b>logo.png</b> (isteğe bağlı)</li>
+      </ul>
+      <label class="dosya-sec">
+        <span>Dosyaları seç</span>
+        <input type="file" id="fetDosyalari" multiple accept=".fet,.json,.xml,.png,.jpg,.jpeg">
+      </label>
+      <p class="secilenler" id="secilenler"></p>
+      <div class="pencere-butonlar">
+        <button value="iptal" class="btn" autofocus>Vazgeç</button>
+        <button type="button" class="btn btn-ana" id="btnOlustur" disabled>Oluştur</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Ders ekleme/düzenleme penceresi (içeriği koddan doldurulur) -->
+  <dialog id="dersPenceresi" aria-labelledby="dpBaslik" closedby="any"></dialog>
+
+  <!-- Ayarlar (içeriği koddan doldurulur) -->
+  <dialog id="ayarlarPenceresi" aria-labelledby="ayBaslik" class="genis"></dialog>
+
+  <!-- Nasıl kullanılır -->
+  <dialog id="yardimPenceresi" aria-labelledby="yBaslik" closedby="any">
+    <form method="dialog" class="pencere yardim">
+      <h2 id="yBaslik">Nasıl kullanılır?</h2>
+      <dl>
+        <dt>Program açmak</dt>
+        <dd>Soldaki listeden sınıf veya öğretmen seçin. Birden fazlasını seçebilirsiniz; ◀ ▶ ile sıralarını değiştirin. ☑ hepsini açar, ✕ kapatır.</dd>
+        <dt>Ders taşımak</dt>
+        <dd>Dersi fareyle tutup başka bir saate sürükleyin. Dolu bir dersin üstüne bırakırsanız ikisi yer değiştirir. Yeşil saatler dersin sorunsuz konabileceği yerlerdir. Vazgeçmek için Esc.</dd>
+        <dt>Dersi düzenlemek veya silmek</dt>
+        <dd>Derse çift tıklayın.</dd>
+        <dt>Ders eklemek</dt>
+        <dd>Boş bir saate çift tıklayın.</dd>
+        <dt>Uyarılar</dt>
+        <dd>Bir öğretmen ya da sınıf aynı saatte iki derse düşerse kırmızı ⚠ işareti çıkar. Üstteki uyarı düğmesinden listeyi görebilirsiniz. İşlem yine de yapılır.</dd>
+        <dt>Geri almak</dt>
+        <dd>↶ Geri al (Ctrl+Z) · ↷ Yinele (Ctrl+Y)</dd>
+        <dt>Öğretmen, ders, saat ve renkler</dt>
+        <dd>⚙ Ayarlar'dan değiştirilir.</dd>
+        <dt>Kaydetmek</dt>
+        <dd>Kaydet (Ctrl+S) sınıflar ve öğretmenler PDF'lerini yeni versiyon numarasıyla oluşturur.</dd>
+      </dl>
+      <div class="pencere-butonlar">
+        <button value="kapat" class="btn btn-ana" autofocus>Tamam</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Uyarılar paneli: sayfa kullanılmaya devam ederken açık kalabilir -->
+  <dialog id="uyariPaneli" popover="auto" aria-labelledby="upBaslik" class="uyari-paneli">
+    <div class="panel-ust">
+      <h2 id="upBaslik">Uyarılar</h2>
+      <button type="button" class="kapat" popovertarget="uyariPaneli" popovertargetaction="hide" aria-label="Uyarıları kapat">×</button>
+    </div>
+    <p class="not">Bir uyarıya tıklayınca ilgili programlar açılır.</p>
+    <ul id="uyariListesi" class="uyari-listesi"></ul>
+  </dialog>
+</body>
+</html>

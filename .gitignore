@@ -1,0 +1,23 @@
+# Depo herkese açıktır. Kişisel veri içeren hiçbir dosya buraya girmemeli.
+
+# Ders programı PDF'leri (öğretmen ve sınıf bilgileri)
+*.pdf
+cikti/
+
+# Okul ayarları (rehber öğretmen isimleri, logolar) ve FET dosyaları
+okullar/
+*-fet/
+*.fet
+*_activities.xml
+*_subgroups.xml
+*_teachers.xml
+*.csv
+
+# Eski Python script'leri (içlerinde öğretmen isimleri var)
+*.py
+logo.png
+
+# Yerel araç ayarları
+.claude/
+node_modules/
+__pycache__/
