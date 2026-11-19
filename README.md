@@ -2,6 +2,11 @@
 
 Tarayıcıda çalışan, sunucu gerektirmeyen ders programı düzenleyicisi. Ayrıntılı tasarım: [SPEC.md](SPEC.md).
 
+**Uygulama:** https://aspiresoft.github.io/ders-programi/
+
+PDF'ler kullanıcının bilgisayarında açılır ve kaydedilir; hiçbir veri internete gönderilmez.
+`main` dalına her gönderimde `app/` klasörü GitHub Pages'e kendiliğinden yayınlanır.
+
 ## Klasörler
 
 | Klasör | İçerik |
